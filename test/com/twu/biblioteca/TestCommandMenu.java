@@ -6,7 +6,9 @@ import org.junit.Test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -38,9 +40,9 @@ public class TestCommandMenu {
 
     @Test
     public void shouldListAllMenuOptions() {
-        HashMap<String, Command> commands = new HashMap<String, Command>();
+        HashMap<Integer, Command> commands = new HashMap<Integer, Command>();
         Command command = mock(Command.class);
-        commands.put("list", command);
+        commands.put(1, command);
         commandMenu = new CommandMenu(printStream, reader, commands);
 
         commandMenu.listOptions();
@@ -49,55 +51,43 @@ public class TestCommandMenu {
 
     @Test
     public void shouldAcceptAndExecuteCommand() throws IOException {
-        HashMap<String, Command> commands = new HashMap<String, Command>();
+        HashMap<Integer, Command> commands = new HashMap<Integer, Command>();
         commandMenu = new CommandMenu(printStream, reader, commands);
         Command command = mock(Command.class);
-        commands.put("zzzz", command);
+        commands.put(-1, command);
         when(reader.readLine()).thenReturn("zzzz");
 
         String userCommand = commandMenu.promptUser();
-        commandMenu.executeCommand(userCommand);
+        commandMenu.processUserCommand(userCommand);
         verify(command).execute();
     }
 
     @Test
     public void shouldDisplayBookList() throws IOException {
-        HashMap<String, Command> commands = new HashMap<String, Command>();
+        HashMap<Integer, Command> commands = new HashMap<Integer, Command>();
+        List<Book> listOfBooks = new ArrayList<Book>();
         commandMenu = new CommandMenu(mock(PrintStream.class), reader, commands);
-        Command command = new ListBooksCommand(new Library(printStream));
-        commands.put("list",command);
+        Command command = new ListBooksCommand(new Library(printStream, listOfBooks));
+        commands.put(1,command);
         when(reader.readLine()).thenReturn("list");
 
         String userCommand = commandMenu.promptUser();
-        commandMenu.executeCommand(userCommand);
+        commandMenu.processUserCommand(userCommand);
         verify(printStream).println("Harry Potter And The Prisoner of Azkaban|  JK Rowling                              |  1999\n" +
                 "The Shining                             |  Steven King                             |  1980\n");
     }
 
     @Test
-    public void shouldDisplayInvalidOptionMessage() throws IOException {
-        HashMap<String, Command> commands = new HashMap<String, Command>();
+    public void shouldReturnZeroWhenInvalid() throws IOException {
+        HashMap<Integer, Command> commands = new HashMap<Integer, Command>();
         commandMenu = new CommandMenu(printStream, reader, commands);
         Command command = mock(Command.class);
-        commands.put("zzzz", command);
+        commands.put(-1, command);
         when(reader.readLine()).thenReturn("Invalid option");
 
         String userCommand = commandMenu.promptUser();
-        commandMenu.executeCommand(userCommand);
-        verify(printStream).println("Select a valid option");
-    }
-
-    @Test
-    public void shouldInvalidOptionReturnFalse() throws IOException {
-        HashMap<String, Command> commands = new HashMap<String, Command>();
-        commandMenu = new CommandMenu(printStream, reader, commands);
-        Command command = mock(Command.class);
-        commands.put("zzzz", command);
-        when(reader.readLine()).thenReturn("Invalid option");
-
-        String userCommand = commandMenu.promptUser();
-        boolean validOption = commandMenu.executeCommand(userCommand);
-        assertThat(validOption, is(false));
+        int inputCommand = commandMenu.processUserCommand(userCommand);
+        assertThat(inputCommand, is(0));
     }
     
     

@@ -1,3 +1,5 @@
+package com.twu.biblioteca;
+
 import com.twu.biblioteca.StringLengthFinder;
 import org.junit.Test;
 
@@ -12,7 +14,7 @@ import static org.junit.Assert.assertThat;
  * Created by brandonteng on 6/20/14.
  */
 public class TestStringLengthFinder {
-    
+
     @Test
     public void shouldReturnMaxStringLength(){
         StringLengthFinder lengthFinder = new StringLengthFinder();
